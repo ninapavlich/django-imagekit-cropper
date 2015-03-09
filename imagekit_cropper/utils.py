@@ -91,8 +91,6 @@ class InstanceSourceGroupRegistry(object):
 
         instance = kwargs['instance']
 
-        print 'source_group_receiver: %s'%(instance)
-
         # Ignore signals from unregistered groups.
         if source_group not in self._source_groups:
             return
