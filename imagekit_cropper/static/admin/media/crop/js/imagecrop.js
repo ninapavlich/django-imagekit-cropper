@@ -12,7 +12,9 @@ window['jQuery'] = grp.jQuery;
     // Create the defaults once
     var pluginName = "imageCropWidget",
         defaults = {
-            imagePreviewWidth: "300px"
+            imagePreviewWidth: "280px",
+            maxUpscale: 2,
+            warningUpscale: 1.5
         };
 
     // The actual plugin constructor
@@ -38,12 +40,24 @@ window['jQuery'] = grp.jQuery;
             this.original_height = -1;
             
             this.crop_container = $(this.element).find('.image-cropper')[0];
+            this.data_container = $(this.element).find('.image-crop-data')[0];
             this.target_width = parseInt($(this.crop_container).data('width'));
             this.target_height = parseInt($(this.crop_container).data('height'));
             this.target_resize_method = $(this.crop_container).data('resize-method');
             this.target_source = $(this.crop_container).data('source');
             this.target_upscale = $(this.crop_container).data('upscale').toLowerCase()=='true';
             //console.log("upscale? "+$(this.crop_container).data('upscale'))
+
+            $(this.input_container).attr('data-original-value',$(this.input_container).attr('value'));
+
+            
+
+            $(this.data_container).append( '<p class="grp-help">Placeholder help text.</p>' );
+            this.help_text_container = $(this.data_container).find('.grp-help')[0];
+
+            $(this.data_container).append( '<p class="upscale"></p>' );
+            this.upscale_container = $(this.data_container).find('.upscale')[0];
+
 
             this.setImageSource(this.getSourceImage(this.target_source));
             
@@ -89,6 +103,10 @@ window['jQuery'] = grp.jQuery;
             var pickled = crop.x+","+crop.y+","+crop.w+","+crop.h;
             $(this.input_container).val(pickled);
             $(this.input_container).attr('value',pickled);
+
+
+            this.updateScaleNotification();
+            
         },
         getCropValue:function(){
             var pickled = $(this.input_container).attr('value');
@@ -119,28 +137,40 @@ window['jQuery'] = grp.jQuery;
         },
         getResetCrop:function(){
 
-            var target_aspect_ratio = this.target_width / this.target_height;
-            var current_aspect_ratio = this.original_width / this.original_height;
-
-            if(target_aspect_ratio < current_aspect_ratio){
-                //then image height is our limiting factor
-                //and the crop width will be < the original width
-                var target_height = this.original_height;
-                var target_width = target_aspect_ratio * this.original_height;
-                var y = 0;
-                var x = 0.5*(this.original_width - target_width);
-
-            }else{
-                //then image width is our limiting factor
-                //and the crop height will < the original height
-                var target_width = this.original_width;
-                var target_height = this.original_width / target_aspect_ratio;
+            if(isNaN(this.target_height) || isNaN(this.target_width)){
                 var x = 0;
-                var y = 0.5*(this.original_height - target_height);               
+                var y = 0;
+                var w = this.original_width;
+                var h = this.original_height;
+
+                console.log("upscale? "+this.target_upscale+" target_w: "+this.target_width+" w: "+w+" target_height: "+this.target_height+" h? "+h)
+            }else{
+                var target_aspect_ratio = this.target_width / this.target_height;
+                var current_aspect_ratio = this.original_width / this.original_height;
+
+                if(target_aspect_ratio < current_aspect_ratio){
+                    //then image height is our limiting factor
+                    //and the crop width will be < the original width
+                    var h = this.original_height;
+                    var w = target_aspect_ratio * this.original_height;
+                    var y = 0;
+                    var x = 0.5*(this.original_width - w);
+
+                }else{
+                    //then image width is our limiting factor
+                    //and the crop height will < the original height
+                    var w = this.original_width;
+                    var h = this.original_width / target_aspect_ratio;
+                    var x = 0;
+                    var y = 0.5*(this.original_height - h);               
+
+                }
 
             }
 
-            reset = {'x':x,'y':y,'w':target_width,'h':target_height}  
+            
+
+            reset = {'x':x,'y':y,'w':w,'h':h}  
             // console.log("getResetCrop: "+reset)
             return reset;
         },
@@ -161,11 +191,21 @@ window['jQuery'] = grp.jQuery;
 
             var aspect_ratio = this.target_width / this.target_height;
             var initial_crop = this.getCropValue();
-            var minW = 0;
-            var minH = 0;
+            var minW = 1;
+            var minH = 1;
             if(this.target_upscale==false){
-                var minW = this.scaleToPreview(this.target_width);
-                var minH = this.scaleToPreview(this.target_height);
+
+                if(this.target_width > this.original_width){
+                    minW = this.scaleToPreview(this.original_width);    
+                }else{
+                    minW = this.scaleToPreview(this.target_width);
+                }
+
+                if(this.target_height > this.original_height){
+                    minH = this.scaleToPreview(this.original_height);    
+                }else{
+                    minH = this.scaleToPreview(this.target_height);
+                }
             }
             
             // console.log("apply initial_crop: "+initial_crop.x+" minW: "+minW+" maxW: "+minW)
@@ -182,7 +222,36 @@ window['jQuery'] = grp.jQuery;
                 minSize: [minW, minH]
             });
         },
+        updateScaleNotification: function(){
 
+            var scale_w = this.target_width / crop.w;
+            var scale_h = this.target_height / crop.h;
+            
+            var warning_upscale = scale_w > 1.01 || scale_h > 1.01
+            var warning_upscale_high = scale_w > this.options.warningUpscale || scale_h > this.options.warningUpscale;
+
+            if(warning_upscale){
+                var max = isNaN(scale_w)? scale_h : isNaN(scale_h)? scale_w : Math.max(scale_w, scale_h);
+                $(this.upscale_container).text('This crop will up-scale the image by '+(this.formatUpscale(max))+"%. Increase your bounding box or upload a larger source image if possible.");                
+            }
+
+            if(this.target_upscale && warning_upscale){
+                $(this.upscale_container).show();
+            }else{
+                $(this.upscale_container).hide();
+            }
+            
+            if(this.target_upscale && warning_upscale_high){
+                $(this.upscale_container).addClass('warning');                
+            }else{
+                $(this.upscale_container).removeClass('warning');                
+            }
+            
+
+        },
+        formatUpscale:function(number){
+            return parseInt(100*(number-1));
+        },
         addListeners: function() {
             //bind events
             var parent = this;
@@ -191,7 +260,10 @@ window['jQuery'] = grp.jQuery;
                 if (input.files && input.files[0]) {
                     var reader = new FileReader();
                     reader.onload = function (e) {   
+                        $(parent.input_container).attr('value', '');
+                        $(parent.input_container).val('');
                         parent.setImageSource(e.target.result);
+
                     }
                     reader.readAsDataURL(input.files[0]);
                 }

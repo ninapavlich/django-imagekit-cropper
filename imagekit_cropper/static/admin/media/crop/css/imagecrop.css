@@ -1,0 +1,8 @@
+.image-crop-data .upscale{
+	max-width:260px;
+	font-weight:bold;
+}
+.image-crop-data .upscale.warning{
+	
+	color:#ab2b2b;
+}

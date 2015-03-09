@@ -53,9 +53,9 @@ class CropCoordinates(object):
         self.y = y
         self.width = width
         self.height = height
-        
+
     def __repr__(self):
-        if self.x:
+        if self.width or self.height:
             return "%s,%s,%s,%s"%(self.x, self.y, self.width, self.height)
         return ''
 
@@ -93,6 +93,7 @@ class ImageCropField(models.Field):
         return 'varchar(100)'
     
     def to_python(self,value):
+        
         if value in ( None,''):
             return CropCoordinates()
         else:
@@ -100,7 +101,12 @@ class ImageCropField(models.Field):
                 return value
             else:
                 split_items = value.split(',')
-                args = [float(split_items[0]),float(split_items[1]),float(split_items[2]),float(split_items[3])]
+                x = float(split_items[0])
+                y = float(split_items[1])
+                w = float(split_items[2])
+                h = float(split_items[3])
+
+                args = [x,y,w,h]
                 if len(args) != 4 and value is not None:
                     raise ValidationError("Invalid input for a CropCoordinates instance")
                 return CropCoordinates(*args)
@@ -108,7 +114,8 @@ class ImageCropField(models.Field):
 
     def get_prep_value(self, value):
         if value:
-            return ','.join([str(value.x),str(value.y),str(value.width),str(value.height)])
+            store_value = ','.join([str(value.x),str(value.y),str(value.width),str(value.height)])
+            return store_value
         return None
     
     def get_internal_type(self):

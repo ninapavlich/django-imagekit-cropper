@@ -239,6 +239,8 @@ class InstanceSpec(ImageSpec):
             for extra_field in self.extra_hash_key_values:
                 field = getattr(self.instance, extra_field)
                 keys.append(field)
+
+        print 'pickle keys: %s'%(keys)
         return hashers.pickle(keys)
 
 
