@@ -1,6 +1,9 @@
+from django.db import models
+
 from imagekit.models import ImageSpecField
 
-from .utils import InstanceSpec, instance_source_group_registry
+from .utils import InstanceSpec, instance_source_group_registry, \
+    ImageSpecFileDescriptor, InstanceFieldSourceGroup
 
 class InstanceSpecField(ImageSpecField):
     """

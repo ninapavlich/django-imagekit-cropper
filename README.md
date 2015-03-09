@@ -14,6 +14,20 @@ using the image source and the value of the image crop field.
 
 
 ## Example Usage
+```
+    $ pip install django-imagekit-cropper
+```
+
+```
+    #settings.py
+
+    INSTALLED_APPS = (
+        ...
+        imagekit_cropper,
+        ...
+    )
+```    
+
 
 ```python
     #models.py
