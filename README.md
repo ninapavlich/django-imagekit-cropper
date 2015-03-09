@@ -1,7 +1,7 @@
 # django-imagekit-cropper
 A library to enhance django-imagekit which allows you to specify your image variant crops:
 
-![CKEditor Dialog](https://raw.github.com/ninapavlich/ckeditor-imagekit-cropper/master/docs/screenshots/crop_screenshot.png)
+![CKEditor Dialog](https://raw.github.com/ninapavlich/django-imagekit-cropper/master/docs/screenshots/crop_screenshot.png)
 
 **InstanceSpecField** This is a class that extends ImageSpecField which passes the model instance to 
 the processors so that you can access other model fields to process the image.
