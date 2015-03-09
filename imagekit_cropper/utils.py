@@ -15,6 +15,8 @@ from imagekit.models.fields.utils import ImageSpecFileDescriptor
 from imagekit.registry import generator_registry, cachefile_registry
 from imagekit.specs.sourcegroups import ImageFieldSourceGroup, ModelSignalRouter, ik_model_receiver
 from imagekit.utils import  call_strategy_method
+from imagekit.cachefiles import ImageCacheFile
+
 
 
 
@@ -27,7 +29,7 @@ instance_source_saved = Signal()
 
 def instance_ik_model_receiver(fn):
     """
-    A method decorator that filters out signals coming from models that don't
+    A method decorator that filters out sign_original_specals coming from models that don't
     have fields that function as ImageFieldSourceGroup sources.
 
     """
@@ -88,6 +90,8 @@ class InstanceSourceGroupRegistry(object):
         source_group = sender
 
         instance = kwargs['instance']
+
+        print 'source_group_receiver: %s'%(instance)
 
         # Ignore signals from unregistered groups.
         if source_group not in self._source_groups:
@@ -193,10 +197,35 @@ class InstanceProcessorPipeline(ProcessorPipeline):
             img = proc.process(img, instance)
         return img
 
+
+class InstanceSpecFileDescriptor(ImageSpecFileDescriptor):
+    
+    def __get__(self, instance, owner):
+        print 'get %s - %s. attname: %s field %s source_field_name: %s'%(instance, owner, self.attname, self.field, self.source_field_name)
+
+        if instance is None:
+            return self.field
+        else:
+            source = getattr(instance, self.source_field_name)
+            spec = self.field.get_spec(source=source)
+            
+            #HOOK -- pass instance to spec
+            spec.instance = instance
+            
+            file = ImageCacheFile(spec)
+
+
+            instance.__dict__[self.attname] = file
+            return file
+
+    def __set__(self, instance, value):
+        instance.__dict__[self.attname] = value
+
 class InstanceSpec(ImageSpec):
     
     #Extra hash key values
     extra_hash_key_values = None
+    instance = None
 
     def generate(self):
         
@@ -218,6 +247,8 @@ class InstanceSpec(ImageSpec):
 
         # Run the processors
         img = ProcessorPipeline(self.processors or []).process(img)
+
+        #HOOK -- now process instance processors
         img = InstanceProcessorPipeline(self.instance_processors or []).process(img, self.instance)            
 
         format = self.format or img.format or original_format or 'JPEG'
@@ -225,6 +256,7 @@ class InstanceSpec(ImageSpec):
         return img_to_fobj(img, format, self.autoconvert, **options)
 
     def get_hash(self):
+        
         keys = [
             self.source.name,
             self.processors,
@@ -233,12 +265,12 @@ class InstanceSpec(ImageSpec):
             self.options,
             self.autoconvert,
         ]
-
+        
         #Use the actual values of the fields to hash the instance
-        if self.instance:
-            for extra_field in self.extra_hash_key_values:
-                field = getattr(self.instance, extra_field)
-                keys.append(field)
+        #REQUIRES INSTANCE:
+        for extra_field in self.extra_hash_key_values:
+            field = getattr(self.instance, extra_field)
+            keys.append(field)
 
         # print 'pickle keys: %s'%(keys)
         return hashers.pickle(keys)

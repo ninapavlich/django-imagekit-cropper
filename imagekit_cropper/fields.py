@@ -3,7 +3,9 @@ from django.db import models
 from imagekit.models import ImageSpecField
 
 from .utils import InstanceSpec, instance_source_group_registry, \
-    ImageSpecFileDescriptor, InstanceFieldSourceGroup
+    InstanceSpecFileDescriptor, InstanceFieldSourceGroup
+
+
 
 class InstanceSpecField(ImageSpecField):
     """
@@ -20,7 +22,8 @@ class InstanceSpecField(ImageSpecField):
             id=None, hash_key_values=None):
 
         self.source = source
-        spec = InstanceSpec(self.source)
+        
+        spec = InstanceSpec
         spec.format = format
         spec.image_format = format
         spec.options = options
@@ -29,15 +32,15 @@ class InstanceSpecField(ImageSpecField):
         spec.processors = processors    
         spec.instance_processors = instance_processors        
 
-        return super(InstanceSpecField, self).__init__(None, None, None,
+        super(InstanceSpecField, self).__init__(None, None, None,
             source, cachefile_storage, autoconvert, cachefile_backend, 
             cachefile_strategy, spec, id)
 
     def contribute_to_class(self, cls, name):
         
-        #HOOK for crop firled
+        #HOOK for crop field
         def register_group(source):
-            setattr(cls, name, ImageSpecFileDescriptor(self, name, source))
+            setattr(cls, name, InstanceSpecFileDescriptor(self, name, source))
             self._set_spec_id(cls, name)
 
             # Add the model and field as a source for this spec id
