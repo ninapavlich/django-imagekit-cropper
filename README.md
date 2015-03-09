@@ -18,8 +18,8 @@ using the image source and the value of the image crop field.
 ```python
     #models.py
 
-    from ckeditor_imagekit_cropper.fields import ImageCropField, InstanceSpecField  
-    from ckeditor_imagekit_croper.processors import PositionCrop 
+    from imagekit_cropper.fields import ImageCropField, InstanceSpecField  
+    from imagekit_cropper.processors import PositionCrop 
 
 
     image = models.ImageField(blank=True, null=True)
@@ -54,7 +54,7 @@ using the image source and the value of the image crop field.
     #forms.py
 
     from django import forms
-    from ckeditor_imagekit_cropper.widgets import ImageCropWidget    
+    from imagekit_cropper.widgets import ImageCropWidget    
     from .models import Image
 
     
