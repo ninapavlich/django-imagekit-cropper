@@ -10,3 +10,4 @@ _mailinglist
 .tox
 venv
 .sass-cache/
+build/

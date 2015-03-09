@@ -3,4 +3,4 @@ include LICENSE
 include CHANGELOG.rst
 include README.md
 include docs/ *
-include django_imagekit_cropper/ *
+recursive-include django_imagekit_cropper/ *
