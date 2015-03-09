@@ -35,6 +35,9 @@ using the image source and the value of the image crop field.
     from imagekit_cropper.fields import ImageCropField, InstanceSpecField  
     from imagekit_cropper.processors import PositionCrop 
 
+    help = {
+        'square_150_crop': '150px by 150px crop',        
+    }
 
     image = models.ImageField(blank=True, null=True)
     square_150_crop_properties = {
@@ -46,7 +49,7 @@ using the image source and the value of the image crop field.
         'upscale':False
     }
     square_150_crop = ImageCropField(null=True, blank=True, 
-        properties=square_150_crop_properties)
+        properties=square_150_crop_properties, help_text=help['square_150_crop'])
     square_150 = InstanceSpecField( source=square_150_crop_properties['source'], 
         id='media:profile:cropspec', format='PNG', options={'quality': 85}, 
         hash_key_values=['square_150_crop'],
@@ -73,7 +76,7 @@ using the image source and the value of the image crop field.
 
     
     class ImageAdminForm(forms.ModelForm):
-        square_150_crop = forms.CharField(widget=ImageCropWidget(properties=Image.square_150_crop_properties))
+        square_150_crop = forms.CharField(widget=ImageCropWidget(properties=Image.square_150_crop_properties, help_text=Image.help['square_150_crop']))
 
         class Meta:
             model = Image
