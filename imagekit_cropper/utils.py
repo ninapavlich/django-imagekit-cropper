@@ -95,13 +95,11 @@ class InstanceSourceGroupRegistry(object):
         if source_group not in self._source_groups:
             return
 
-        #HOOk -- update source to point to image file.
+        #HOOK -- update source to point to image file.
         for id in self._source_groups[source_group]:
-            spec_to_update = generator_registry.get(id, source=source)
-            spec_to_update.source = source
-            spec_to_update.instance = instance
-
-        specs = [generator_registry.get(id, source=source) for id in
+            spec_to_update = generator_registry.get(id, source=source, instance=instance)
+                        
+        specs = [generator_registry.get(id, source=source, instance=instance) for id in
                 self._source_groups[source_group]]
         callback_name = self._signals[signal]
 
@@ -197,21 +195,18 @@ class InstanceProcessorPipeline(ProcessorPipeline):
 
 
 class InstanceSpecFileDescriptor(ImageSpecFileDescriptor):
+
     
     def __get__(self, instance, owner):
-        print 'get %s - %s. attname: %s field %s source_field_name: %s'%(instance, owner, self.attname, self.field, self.source_field_name)
+        # print 'get %s - %s. attname: %s field %s source_field_name: %s'%(instance, owner, self.attname, self.field, self.source_field_name)
 
         if instance is None:
             return self.field
         else:
             source = getattr(instance, self.source_field_name)
-            spec = self.field.get_spec(source=source)
-            
-            #HOOK -- pass instance to spec
-            spec.instance = instance
+            spec = self.field.get_spec(source=source, instance=instance)
             
             file = ImageCacheFile(spec)
-
 
             instance.__dict__[self.attname] = file
             return file
@@ -224,6 +219,12 @@ class InstanceSpec(ImageSpec):
     #Extra hash key values
     extra_hash_key_values = None
     instance = None
+
+    def __init__(self, source, instance):
+        self.source = source
+        self.instance = instance
+        
+        super(InstanceSpec, self).__init__(source)
 
     def generate(self):
         
@@ -263,6 +264,7 @@ class InstanceSpec(ImageSpec):
             self.options,
             self.autoconvert,
         ]
+        instance = self.instance
         
         #Use the actual values of the fields to hash the instance
         #REQUIRES INSTANCE:

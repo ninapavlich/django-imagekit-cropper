@@ -50,9 +50,6 @@ window['jQuery'] = grp.jQuery;
 
             $(this.input_container).attr('data-original-value',$(this.input_container).attr('value'));
 
-            
-
-            $(this.data_container).append( '<p class="grp-help">Placeholder help text.</p>' );
             this.help_text_container = $(this.data_container).find('.grp-help')[0];
 
             $(this.data_container).append( '<p class="upscale"></p>' );

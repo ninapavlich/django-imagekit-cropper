@@ -1,6 +1,7 @@
 from django.db import models
 
 from imagekit.models import ImageSpecField
+from imagekit.registry import generator_registry
 
 from .utils import InstanceSpec, instance_source_group_registry, \
     InstanceSpecFileDescriptor, InstanceFieldSourceGroup
@@ -36,10 +37,17 @@ class InstanceSpecField(ImageSpecField):
             source, cachefile_storage, autoconvert, cachefile_backend, 
             cachefile_strategy, spec, id)
 
+    def get_spec(self, source, instance):
+        if not getattr(self, 'spec_id', None):
+            raise Exception('Object %s has no spec id.' % self)
+        item = generator_registry.get(self.spec_id, source=source, instance=instance)
+        return item
+
     def contribute_to_class(self, cls, name):
         
         #HOOK for crop field
         def register_group(source):
+            
             setattr(cls, name, InstanceSpecFileDescriptor(self, name, source))
             self._set_spec_id(cls, name)
 

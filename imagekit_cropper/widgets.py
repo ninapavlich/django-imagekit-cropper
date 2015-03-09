@@ -15,8 +15,6 @@ class ImageCropWidget(widgets.AdminTextInputWidget):
         self.properties = properties
         self.help_text = help_text
         
-        # print 'do i have help text? %s'%(help_text)
-
         return super(ImageCropWidget, self).__init__(*args, **kwargs)
 
         
