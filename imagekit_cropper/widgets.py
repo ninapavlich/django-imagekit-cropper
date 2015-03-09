@@ -1,4 +1,5 @@
 from django.forms import widgets
+from django.utils.safestring import mark_safe
 
 class ImageCropWidget(widgets.TextInput):
     image_model = None

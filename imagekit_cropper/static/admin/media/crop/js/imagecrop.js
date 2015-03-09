@@ -43,7 +43,7 @@ window['jQuery'] = grp.jQuery;
             this.target_resize_method = $(this.crop_container).data('resize-method');
             this.target_source = $(this.crop_container).data('source');
             this.target_upscale = $(this.crop_container).data('upscale').toLowerCase()=='true';
-            console.log("upscale? "+$(this.crop_container).data('upscale'))
+            //console.log("upscale? "+$(this.crop_container).data('upscale'))
 
             this.setImageSource(this.getSourceImage(this.target_source));
             
@@ -71,7 +71,7 @@ window['jQuery'] = grp.jQuery;
             var parent = this;
             $("<img/>").attr("src", this.image_source)
                 .load(function() {
-                    console.log("original width: "+this.width)
+                    //console.log("original width: "+this.width)
 
                     parent.original_width = this.width;
                     parent.original_height = this.height;
@@ -141,7 +141,7 @@ window['jQuery'] = grp.jQuery;
             }
 
             reset = {'x':x,'y':y,'w':target_width,'h':target_height}  
-            console.log("getResetCrop: "+reset)
+            // console.log("getResetCrop: "+reset)
             return reset;
         },
         updateCoordinates: function(c){

@@ -6,7 +6,7 @@ from django.db.models.signals import post_init, post_save
 from django.dispatch import Signal
 from django.utils.functional import wraps
 
-from django.utils.safestring import mark_safe
+
 
 from imagekit import hashers
 from imagekit import ImageSpec, register
