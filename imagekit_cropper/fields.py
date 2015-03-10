@@ -4,7 +4,7 @@ from imagekit.models import ImageSpecField
 from imagekit.registry import generator_registry
 
 from .utils import InstanceSpec, instance_source_group_registry, \
-    InstanceSpecFileDescriptor, InstanceFieldSourceGroup
+    InstanceSpecFileDescriptor, InstanceFieldSourceGroup, hack_spec_field_hash
 
 
 
@@ -24,23 +24,35 @@ class InstanceSpecField(ImageSpecField):
 
         self.source = source
         
+
         spec = InstanceSpec
+        
+        self.format = format
+        self.options = options
+        self.extra_hash_key_values = hash_key_values
+        self.processors = processors
+        self.instance_processors = instance_processors
+
         spec.format = format
-        spec.image_format = format
         spec.options = options
         spec.extra_hash_key_values = hash_key_values
-
-        spec.processors = processors    
-        spec.instance_processors = instance_processors        
+        spec.processors = processors
+        spec.instance_processors = instance_processors
+           
 
         super(InstanceSpecField, self).__init__(None, None, None,
             source, cachefile_storage, autoconvert, cachefile_backend, 
             cachefile_strategy, spec, id)
 
+
     def get_spec(self, source, instance):
         if not getattr(self, 'spec_id', None):
             raise Exception('Object %s has no spec id.' % self)
-        item = generator_registry.get(self.spec_id, source=source, instance=instance)
+        item = generator_registry.get(self.spec_id, source=source, instance=instance, field=hack_spec_field_hash[self.spec_id])
+        
+        # print 'a) field exists? %s'%(hack_spec_field_hash[self.spec_id])
+
+
         return item
 
     def contribute_to_class(self, cls, name):
@@ -50,6 +62,7 @@ class InstanceSpecField(ImageSpecField):
             
             setattr(cls, name, InstanceSpecFileDescriptor(self, name, source))
             self._set_spec_id(cls, name)
+            hack_spec_field_hash[self.spec_id] = self
 
             # Add the model and field as a source for this spec id
             instance_source_group_registry.register(self.spec_id, InstanceFieldSourceGroup(cls, source))            
@@ -94,6 +107,7 @@ class ImageCropField(models.Field):
         models.Field.creation_counter += 1
         super(ImageCropField, self).__init__(*args, **kwargs)
 
+
     def deconstruct(self):
         name, path, args, kwargs = super(ImageCropField, self).deconstruct()
         kwargs['properties'] = self.properties
@@ -112,10 +126,10 @@ class ImageCropField(models.Field):
                 return value
             else:
                 split_items = value.split(',')
-                x = float(split_items[0])
-                y = float(split_items[1])
-                w = float(split_items[2])
-                h = float(split_items[3])
+                x = 0 if split_items[0]=='None' else float(split_items[0])
+                y = 0 if split_items[1]=='None' else float(split_items[1])
+                w = 100 if split_items[2]=='None' else float(split_items[2])
+                h = 100 if split_items[3]=='None' else float(split_items[3])
 
                 args = [x,y,w,h]
                 if len(args) != 4 and value is not None:

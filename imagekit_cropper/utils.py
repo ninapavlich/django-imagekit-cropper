@@ -16,7 +16,7 @@ from imagekit.registry import generator_registry, cachefile_registry
 from imagekit.specs.sourcegroups import ImageFieldSourceGroup, ModelSignalRouter, ik_model_receiver
 from imagekit.utils import  call_strategy_method
 from imagekit.cachefiles import ImageCacheFile
-
+from imagekit.exceptions import MissingSource
 
 
 
@@ -24,6 +24,8 @@ from pilkit.processors import ProcessorPipeline
 from pilkit.utils import open_image, img_to_fobj
 
 
+hack_spec_field_hash = {}
+hack_source_field_hash = {}
 instance_source_saved = Signal()
 
 
@@ -68,6 +70,7 @@ class InstanceSourceGroupRegistry(object):
 
     def register(self, generator_id, source_group):
         from imagekit.specs.sourcegroups import SourceGroupFilesGenerator
+        hack_source_field_hash[source_group] = generator_id
         generator_ids = self._source_groups.setdefault(source_group, set())
         generator_ids.add(generator_id)
         cachefile_registry.register(generator_id,
@@ -97,14 +100,16 @@ class InstanceSourceGroupRegistry(object):
 
         #HOOK -- update source to point to image file.
         for id in self._source_groups[source_group]:
-            spec_to_update = generator_registry.get(id, source=source, instance=instance)
+
+            spec_to_update = generator_registry.get(id, source=source, instance=instance, field=hack_spec_field_hash[id])            
                         
-        specs = [generator_registry.get(id, source=source, instance=instance) for id in
+        specs = [generator_registry.get(id, source=source, instance=instance, field=hack_spec_field_hash[id]) for id in
                 self._source_groups[source_group]]
         callback_name = self._signals[signal]
 
         for spec in specs:
             file = ImageCacheFile(spec)
+            # print 'SEPC %s file %s'%(spec, file)
             call_strategy_method(file, callback_name)
 
 instance_source_group_registry = InstanceSourceGroupRegistry()
@@ -152,7 +157,7 @@ class InstanceModelSignalRouter(object):
             self.init_instance(instance)
             old_hashes = instance._ik.get('source_hashes', {}).copy()
             new_hashes = self.update_source_hashes(instance)
-            source_fields = self.get_source_fields(instance)
+            source_fields = self.get_source_fields(instance)            
             for attname in source_fields:
                 file = getattr(instance, attname)
                 if file:
@@ -177,7 +182,9 @@ class InstanceModelSignalRouter(object):
         for source_group in self._source_groups:
             if issubclass(model_class, source_group.model_class) and source_group.image_field == attname:
                 #NEW HOOK -- send instance
-                signal.send(sender=source_group, source=file, instance=instance)
+                hack_source_group_lookup = hack_source_field_hash[source_group]
+                hack_field_lookup = hack_spec_field_hash[hack_source_group_lookup]
+                signal.send(sender=source_group, source=file, instance=instance, field=hack_field_lookup)
 
 instance_model_signal_router = InstanceModelSignalRouter()
 
@@ -215,15 +222,15 @@ class InstanceSpecFileDescriptor(ImageSpecFileDescriptor):
         instance.__dict__[self.attname] = value
 
 class InstanceSpec(ImageSpec):
-    
-    #Extra hash key values
-    extra_hash_key_values = None
-    instance = None
 
-    def __init__(self, source, instance):
+    
+    def __init__(self, source, instance, field):
         self.source = source
         self.instance = instance
-        
+        self.field = field
+        # print 'FIELD %s'%(field.extra_hash_key_values)
+        # self.extra_hash_key_values = None
+                
         super(InstanceSpec, self).__init__(source)
 
     def generate(self):
@@ -245,12 +252,12 @@ class InstanceSpec(ImageSpec):
         original_format = img.format       
 
         # Run the processors
-        img = ProcessorPipeline(self.processors or []).process(img)
+        img = ProcessorPipeline(self.field.processors or []).process(img)
 
         #HOOK -- now process instance processors
-        img = InstanceProcessorPipeline(self.instance_processors or []).process(img, self.instance)            
+        img = InstanceProcessorPipeline(self.field.instance_processors or []).process(img, self.instance)            
 
-        format = self.format or img.format or original_format or 'JPEG'
+        format = self.field.format or img.format or original_format or 'JPEG'
         options = self.options or {}
         return img_to_fobj(img, format, self.autoconvert, **options)
 
@@ -258,19 +265,19 @@ class InstanceSpec(ImageSpec):
         
         keys = [
             self.source.name,
-            self.processors,
-            self.instance_processors,
-            self.format,
-            self.options,
+            self.field.processors,
+            self.field.instance_processors,
+            self.field.format,
+            self.field.options,
             self.autoconvert,
         ]
         instance = self.instance
         
         #Use the actual values of the fields to hash the instance
         #REQUIRES INSTANCE:
-        for extra_field in self.extra_hash_key_values:
-            field = getattr(self.instance, extra_field)
-            keys.append(field)
+        for extra_field in self.field.extra_hash_key_values:
+            #field = getattr(self.instance, extra_field)
+            keys.append(extra_field)
 
         # print 'pickle keys: %s'%(keys)
         return hashers.pickle(keys)
