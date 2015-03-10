@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 #this is a test
 setup(name = 'django-imagekit-cropper',
       description = 'Allow users to manually specify image variant crops',
-      version = '0.10',
+      version = '0.11',
       url = 'https://github.com/ninapavlich/django-imagekit-cropper',
       author = 'Nina Pavlich',
       author_email='nina@ninalp.com',

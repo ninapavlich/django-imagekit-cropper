@@ -5,6 +5,9 @@ from django.core.management.base import BaseCommand
 
 from imagekit.registry import generator_registry, cachefile_registry
 from imagekit.exceptions import MissingSource
+from imagekit.utils import  call_strategy_method
+from imagekit.cachefiles import ImageCacheFile
+
 from imagekit_cropper.utils import hack_spec_field_hash
 
 
@@ -53,8 +56,9 @@ well as "a:b" and "a:b:c".""")
                                 print '%s - %s'%(generator_id, instance)
                                 source = getattr(instance, image_field)
                                 field = hack_spec_field_hash[generator_id]
-                                item = generator_registry.get(generator_id, source=source, instance=instance, field=field)
-                                item.generate()                                
+                                spec = generator_registry.get(generator_id, source=source, instance=instance, field=field)
+                                file = ImageCacheFile(spec)
+                                call_strategy_method(file, 'on_source_saved')                         
 
                             except Exception, err:
                                 print traceback.format_exc()
