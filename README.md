@@ -12,6 +12,7 @@ widget to allow admins to visually crop the image.
 **PositionCrop** This a custom processor which recieves the model instance and crops the image
 using the image source and the value of the image crop field.
 
+**WARNING:** This library is in very early alpha stages.
 
 ## Example Usage
 ```
