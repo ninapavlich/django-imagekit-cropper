@@ -12,7 +12,7 @@ widget to allow admins to visually crop the image.
 **PositionCrop** This a custom processor which recieves the model instance and crops the image
 using the image source and the value of the image crop field.
 
-**WARNING:** This library is in very early alpha stages.
+**WARNING:** This library is in very early alpha stages. I have only tested this on version django-imagekit==3.2.5
 
 ## Example Usage
 ```
@@ -84,4 +84,8 @@ using the image source and the value of the image crop field.
 
 ``` 
 
+To generate images, you'll need to use this modified version of the generateimages command:
+```
+    $ python manage.py generateimages_cropped
+```
 

@@ -106,6 +106,7 @@ class InstanceSourceGroupRegistry(object):
         specs = [generator_registry.get(id, source=source, instance=instance, field=hack_spec_field_hash[id]) for id in
                 self._source_groups[source_group]]
         callback_name = self._signals[signal]
+        # print 'callback_name? %s'%(callback_name)
 
         for spec in specs:
             file = ImageCacheFile(spec)
@@ -259,7 +260,10 @@ class InstanceSpec(ImageSpec):
 
         format = self.field.format or img.format or original_format or 'JPEG'
         options = self.options or {}
-        return img_to_fobj(img, format, self.autoconvert, **options)
+        fobj = img_to_fobj(img, format, self.autoconvert, **options)
+        # print 'fobj? %s - %s - %s'%(fobj, img, format)
+        # print options
+        return fobj
 
     def get_hash(self):
         
@@ -276,8 +280,9 @@ class InstanceSpec(ImageSpec):
         #Use the actual values of the fields to hash the instance
         #REQUIRES INSTANCE:
         for extra_field in self.field.extra_hash_key_values:
-            #field = getattr(self.instance, extra_field)
-            keys.append(extra_field)
+            field = getattr(self.instance, extra_field)
+            field_hash = "%s_%s"%(extra_field, field)
+            keys.append(field_hash)
 
         # print 'pickle keys: %s'%(keys)
         return hashers.pickle(keys)

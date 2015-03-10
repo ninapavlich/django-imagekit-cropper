@@ -33,13 +33,6 @@ class InstanceSpecField(ImageSpecField):
         self.processors = processors
         self.instance_processors = instance_processors
 
-        spec.format = format
-        spec.options = options
-        spec.extra_hash_key_values = hash_key_values
-        spec.processors = processors
-        spec.instance_processors = instance_processors
-           
-
         super(InstanceSpecField, self).__init__(None, None, None,
             source, cachefile_storage, autoconvert, cachefile_backend, 
             cachefile_strategy, spec, id)
@@ -50,9 +43,7 @@ class InstanceSpecField(ImageSpecField):
             raise Exception('Object %s has no spec id.' % self)
         item = generator_registry.get(self.spec_id, source=source, instance=instance, field=hack_spec_field_hash[self.spec_id])
         
-        # print 'a) field exists? %s'%(hack_spec_field_hash[self.spec_id])
-
-
+        
         return item
 
     def contribute_to_class(self, cls, name):
@@ -104,6 +95,8 @@ class ImageCropField(models.Field):
         self.null = True
         self.creation_counter = models.Field.creation_counter        
         self.properties = properties
+        # self.default_width = self.properties['width'] if self.properties['width'] else 1000
+        # self.default_height = self.properties['height'] if self.properties['height'] else 1000
         models.Field.creation_counter += 1
         super(ImageCropField, self).__init__(*args, **kwargs)
 
@@ -125,11 +118,18 @@ class ImageCropField(models.Field):
             if isinstance(value, CropCoordinates):
                 return value
             else:
+
+                if 'None' in value:
+                    return CropCoordinates()
+
                 split_items = value.split(',')
-                x = 0 if split_items[0]=='None' else float(split_items[0])
-                y = 0 if split_items[1]=='None' else float(split_items[1])
-                w = 100 if split_items[2]=='None' else float(split_items[2])
-                h = 100 if split_items[3]=='None' else float(split_items[3])
+
+                
+
+                x = float(split_items[0])
+                y = float(split_items[1])
+                w = float(split_items[2])
+                h = float(split_items[3])
 
                 args = [x,y,w,h]
                 if len(args) != 4 and value is not None:

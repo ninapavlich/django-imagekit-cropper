@@ -26,15 +26,20 @@ class PositionCrop(object):
         width = image.size[0]
         height = image.size[1]
         
-        # print 'process %s - %s - %s upscale? %s'%(self.width, self.height, self.resize_method, self.upscale)
+        # print 'process %s :: original width %s original height %s || SETTINGS %s - %s - %s upscale? %s crop? %s, %s, %s, %s'%(instance, width, height, self.width, self.height, self.resize_method, self.upscale, crop_value.x, crop_value.y, crop_value.width, crop_value.height)
         is_empty_cropper = crop_value == None or crop_value == '' or (crop_value.width==None and crop_value.height==None)
         if is_empty_cropper:
             #Set crop with inital crop.
 
+            crop_w = width if self.width is None else self.width
+            crop_h = height if self.height is None else self.height
+
             if self.resize_method == 'fit':
-                resizer = ResizeToFit(self.width, self.height, None, self.upscale)            
+                # print "Resize to fit: %s, %s"%(crop_w, crop_h)
+                resizer = ResizeToFit(crop_w, crop_h, None, self.upscale)            
             else:
-                resizer = ResizeToFill(self.width, self.height, None, self.upscale)
+                # print "Resize to fill: %s, %s"%(crop_w, crop_h)
+                resizer = ResizeToFill(crop_w, crop_h, None, self.upscale)
 
             resized = resizer.process(image)
             return resized
