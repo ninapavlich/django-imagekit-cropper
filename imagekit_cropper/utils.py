@@ -282,6 +282,7 @@ class InstanceSpec(ImageSpec):
         for extra_field in self.field.extra_hash_key_values:
             field = getattr(self.instance, extra_field)
             field_hash = "%s_%s"%(extra_field, field)
+            # print 'field_hash %s'%(field_hash)
             keys.append(field_hash)
 
         # print 'pickle keys: %s'%(keys)

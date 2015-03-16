@@ -113,6 +113,7 @@ class ImageCropField(models.Field):
     def to_python(self,value):
         
         if value in ( None,''):
+            
             return CropCoordinates()
         else:
             if isinstance(value, CropCoordinates):

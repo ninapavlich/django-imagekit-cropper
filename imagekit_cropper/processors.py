@@ -31,8 +31,17 @@ class PositionCrop(object):
         if is_empty_cropper:
             #Set crop with inital crop.
 
+            # print 'crop: %s, %s original: %s, %s'%(self.width, self.height, original_width, original_height)
+
             crop_w = self.width#width if self.width is None else self.width
+            if self.height and not crop_w:
+                crop_w = int(float(float(self.height) / float(original_height))*float(original_width))
+
+
+
             crop_h = self.height#height if self.height is None else self.height
+            if self.width and not crop_h:
+                crop_h = int(float(float(self.width) / float(original_width))*float(original_height))
 
             if self.resize_method == 'fit':
                 # print "Resize to fit: %s, %s"%(crop_w, crop_h)
