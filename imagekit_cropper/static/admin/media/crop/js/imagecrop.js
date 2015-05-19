@@ -26,6 +26,10 @@ window['jQuery'] = grp.jQuery;
         this._defaults = defaults;
         this._name = pluginName;
 
+        if (typeof window['image_crops'] == "undefined") {
+           window['image_crops'] = {};
+        }
+
 
         this.init();
     }
@@ -74,26 +78,105 @@ window['jQuery'] = grp.jQuery;
             // }
 
             //create fresh instances...
-            $(this.crop_container).html($('<img>'))
-            this.image = $(this.crop_container).find('img')[0]; 
-
-            this.original_width = -1;
-            this.original_height = -1;
+            $(this.crop_container).html($('<img>'));
             var parent = this;
-            $("<img/>").attr("src", this.image_source)
-                .load(function() {
-                    //console.log("original width: "+this.width)
+            this.image = $(this.crop_container).find('img')[0];
 
-                    parent.original_width = this.width;
-                    parent.original_height = this.height;
-                    parent.render();
+            
+            if(this.image_source in window['image_crops']){
+
+                var loaded = window['image_crops'][this.image_source]['loaded'];
+                var image = window['image_crops'][this.image_source]['image'];
+                if(loaded==true){
+                    this.original_width = window['image_crops'][this.image_source]['original_width'];
+                    this.original_height = window['image_crops'][this.image_source]['original_height'];
+                    this.image_preview_source = window['image_crops'][this.image_source]['preview'];
+                    this.render();
+                }else{
+                    image.load(function(event) {
+                        parent.imageLoaded(event, this);
+                    });    
+                }
+                
+            }else{
+                
+                 
+                this.original_width = -1;
+                this.original_height = -1;
+                var image = $("<img/>");
+                window['image_crops'][this.image_source] = {'loaded':false,'image':image}
+
+                image.load(function(event) {
+
+                    window['image_crops'][parent.image_source]['loaded'] = true;
+                    window['image_crops'][parent.image_source]['original_width'] = this.width;
+                    window['image_crops'][parent.image_source]['original_height'] = this.height;
+                    window['image_crops'][parent.image_source]['preview'] = parent.getResizedImage(this, $(parent.crop_container).width())
+
+                    parent.imageLoaded(event, this);
                 });
+                image.attr("src", this.image_source);
 
+            }
+
+            
+
+        },
+        imageLoaded: function(event, image){
+            
+            this.original_width = image.width;
+            this.original_height = image.height;
+            this.image_preview_source = window['image_crops'][this.image_source]['preview'];
+
+            this.render();
+        },
+        isCanvasSupported:function (){
+          var elem = document.createElement('canvas');
+          return !!(elem.getContext && elem.getContext('2d'));
+        },
+        getResizedImage:function(image, MAX_WIDTH, MAX_HEIGHT){
+
+            if(this.isCanvasSupported()==false){
+            //no canvas support :(
+                return self.image_source;
+            }
+
+            var canvas = document.createElement('canvas');
+            
+            if(typeof(MAX_WIDTH) == 'undefined'){
+                MAX_WIDTH = 800
+            }
+            if(typeof(MAX_HEIGHT) == 'undefined'){
+                MAX_HEIGHT = 600
+            }
+
+            var width = image.width;
+            var height = image.height;
+             
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(image, 0, 0, width, height);
+
+            var dataurl = canvas.toDataURL("image/png");
+            return dataurl;
         },
         setImageSource: function(source) {            
             this.image_source = source;
             this.initialRender();
-            this.render();
+            //this.render();
         },
         setCropValue:function(preview_crop){
             crop = this.cropToRealValues(preview_crop);
@@ -140,7 +223,7 @@ window['jQuery'] = grp.jQuery;
                 var w = this.original_width;
                 var h = this.original_height;
 
-                console.log("upscale? "+this.target_upscale+" target_w: "+this.target_width+" w: "+w+" target_height: "+this.target_height+" h? "+h)
+                //console.log("upscale? "+this.target_upscale+" target_w: "+this.target_width+" w: "+w+" target_height: "+this.target_height+" h? "+h)
             }else{
                 var target_aspect_ratio = this.target_width / this.target_height;
                 var current_aspect_ratio = this.original_width / this.original_height;
@@ -184,8 +267,8 @@ window['jQuery'] = grp.jQuery;
             //Update view
             var parent = this;
             $(this.image).attr('width', this.options.imagePreviewWidth);
-            $(this.image).attr('src', this.image_source);
-
+            $(this.image).attr('src', this.image_preview_source);
+            
             var aspect_ratio = this.target_width / this.target_height;
             var initial_crop = this.getCropValue();
             var minW = 1;
