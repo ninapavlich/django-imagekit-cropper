@@ -47,6 +47,7 @@ window['jQuery'] = grp.jQuery;
             this.data_container = $(this.element).find('.image-crop-data')[0];
             this.target_width = parseInt($(this.crop_container).data('width'));
             this.target_height = parseInt($(this.crop_container).data('height'));
+            this.target_ratio = parseFloat($(this.crop_container).data('ratio'));
             this.target_resize_method = $(this.crop_container).data('resize-method');
             this.target_source = $(this.crop_container).data('source');
             this.target_upscale = $(this.crop_container).data('upscale').toLowerCase()=='true';
@@ -104,6 +105,7 @@ window['jQuery'] = grp.jQuery;
                 this.original_width = -1;
                 this.original_height = -1;
                 var image = $("<img/>");
+                $(image).attr("crossorigin", "anonymous");
                 window['image_crops'][this.image_source] = {'loaded':false,'image':image}
 
                 image.load(function(event) {
@@ -269,7 +271,8 @@ window['jQuery'] = grp.jQuery;
             $(this.image).attr('width', this.options.imagePreviewWidth);
             $(this.image).attr('src', this.image_preview_source);
             
-            var aspect_ratio = this.target_width / this.target_height;
+            var aspect_ratio = isNaN(this.target_ratio)? this.target_width / this.target_height : this.target_ratio;
+            
             var initial_crop = this.getCropValue();
             var minW = 1;
             var minH = 1;
@@ -288,7 +291,7 @@ window['jQuery'] = grp.jQuery;
                 }
             }
             
-            // console.log("apply initial_crop: "+initial_crop.x+" minW: "+minW+" maxW: "+minW)
+            
             
             $(this.image).Jcrop({
                 onSelect: function(c){
@@ -299,7 +302,8 @@ window['jQuery'] = grp.jQuery;
                 },
                 setSelect:   [ initial_crop.x, initial_crop.y, initial_crop.x+initial_crop.w, initial_crop.y+initial_crop.h ],
                 aspectRatio: aspect_ratio,
-                minSize: [minW, minH]
+                minSize: [minW, minH],
+                allowSelect: false
             });
         },
         updateScaleNotification: function(){

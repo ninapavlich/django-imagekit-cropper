@@ -3,9 +3,27 @@ from imagekit.processors import ResizeToFill, ResizeToFit
 from pilkit.processors.resize import ResizeCanvas
 
 
-class PositionCrop(object):
+class BaseInstanceProcessor(object):
+
+
+    def process(self, image):
+        if not self.image_instance:
+            print "WARNING: Position crop expects image_instance, but none set."
+            return image
+
+        return self.process_instance(image, self.image_instance)
+
+    def process_instance(self, image, instance):
+        raise NotImplementedError
+
+    def get_hash(self):
+        return self
+
+
+
+class PositionCrop(BaseInstanceProcessor):
     """
-    Processor to create custom image crops
+    Processor to create custom image crops. Receieves image_instance and implemen
 
     """
 
@@ -14,13 +32,23 @@ class PositionCrop(object):
     def __init__(self, options):
         self.options = options
         self.crop_position_field = options['crop_field']
+
+
         self.resize_method = options['resize_method']
         self.width = options['width']
         self.height = options['height']
         self.upscale = options['upscale'] or False
 
-    def process(self, image, instance):
-        
+    def get_hash(self):
+        #Hash based on crop value
+        crop_value = getattr(self.image_instance, self.crop_position_field)
+        hashed = u"%s-%s-%s-%s"%(self.crop_position_field, crop_value, self.width, self.height)
+        return hashed
+
+
+    def process_instance(self, image, instance): 
+
+
         #Step 1, crop based on crop position
         crop_value = getattr(instance, self.crop_position_field)
         original_width = image.size[0]
@@ -88,4 +116,29 @@ class PositionCrop(object):
         # print 'Resize to %s - %s (%s - %s)'%(width, height, resizer.width, resizer.height)
         resized = resizer.process(cropped)
         return resized
+
+
+
+class PositionAndFormatCrop(PositionCrop):
+    """
+    Processor to create custom image crops. Receieves image_instance and implemen
+
+    """
+
+    def __init__(self, options):
+        self.options = options
+        self.crop_position_field = options['crop_field']
+        self.format_field = options['format_field']
+        self.resize_method = options['resize_method']
+        self.width = options['width']
+        self.height = options['height']
+        self.upscale = options['upscale'] or False
+
+    def get_hash(self):
+        #Hash based on crop value
+        crop_value = getattr(self.image_instance, self.crop_position_field)
+        format = getattr(self.image_instance, self.format_field)
+        hashed = u"%s-%s-%s-%s-%s"%(self.crop_position_field, crop_value, format, self.width, self.height)
+
+        return hashed
 

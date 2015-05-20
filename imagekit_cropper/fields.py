@@ -1,11 +1,13 @@
 from django.db import models
 
 from imagekit.models import ImageSpecField
-from imagekit.registry import generator_registry
+from imagekit.models.fields.utils import ImageSpecFileDescriptor
+from imagekit.registry import generator_registry, unregister
+from imagekit.specs import SpecHost, create_spec_class
+from imagekit.specs.sourcegroups import ImageFieldSourceGroup
 
-from .utils import InstanceSpec, instance_source_group_registry, \
-    InstanceSpecFileDescriptor, InstanceFieldSourceGroup, hack_spec_field_hash
-
+from .specs import InstanceSpec, InstanceFormatSpec
+from .registry import InstanceSourceGroupRegistry, instance_source_group_registry
 
 
 class InstanceSpecField(ImageSpecField):
@@ -14,53 +16,95 @@ class InstanceSpecField(ImageSpecField):
 
     """
 
+
     fields = None
     source = None
 
-    def __init__(self, processors=None, instance_processors=None, format=None, options=None,
+    def __init__(self, processors=None, format=None, options=None,
             source=None, cachefile_storage=None, autoconvert=None,
             cachefile_backend=None, cachefile_strategy=None, spec=None,
-            id=None, hash_key_values=None):
+            id=None):
 
-        self.source = source
-        
 
-        spec = InstanceSpec
-        
-        self.format = format
         self.options = options
-        self.extra_hash_key_values = hash_key_values
+        self.format = format
         self.processors = processors
-        self.instance_processors = instance_processors
 
-        super(InstanceSpecField, self).__init__(None, None, None,
-            source, cachefile_storage, autoconvert, cachefile_backend, 
-            cachefile_strategy, spec, id)
-
-
-    def get_spec(self, source, instance):
-        if not getattr(self, 'spec_id', None):
-            raise Exception('Object %s has no spec id.' % self)
-        item = generator_registry.get(self.spec_id, source=source, instance=instance, field=hack_spec_field_hash[self.spec_id])
         
-        
-        return item
+        #==== FROM ImageSpecField
+        SpecHost.__init__(self, processors=processors, format=format,
+                options=options, cachefile_storage=cachefile_storage,
+                autoconvert=autoconvert,
+                cachefile_backend=cachefile_backend,
+                cachefile_strategy=cachefile_strategy, spec=spec,
+                spec_id=id)
+
+        # TODO: Allow callable for source. See https://github.com/matthewwithanm/django-imagekit/issues/158#issuecomment-10921664
+        self.source = source
+        #==== END FROM ImageSpecField
+
+        self.spec = spec = self.get_spec_class() 
+
+
+        data = self.get_spec_instance_attrs()
+        for attr in data:
+            # print 'set %s = %s'%(attr, data[attr])
+            setattr(self.spec, attr, data[attr])
+
+        spec_id = id
+
+        self._original_spec = spec
+
+        #==== END FROM SpecHost
 
     def contribute_to_class(self, cls, name):
         
-        #HOOK for crop field
-        def register_group(source):
-            
-            setattr(cls, name, InstanceSpecFileDescriptor(self, name, source))
-            self._set_spec_id(cls, name)
-            hack_spec_field_hash[self.spec_id] = self
+        descriptor = ImageSpecFileDescriptor(self, name, self.source)
+        setattr(cls, name, descriptor)
 
-            # Add the model and field as a source for this spec id
-            instance_source_group_registry.register(self.spec_id, InstanceFieldSourceGroup(cls, source))            
+        #Store spec instance info based on spec ID
+        spec_id = ('%s:%s:%s' % (cls._meta.app_label,
+                            cls._meta.object_name, name)).lower()
+        
+        #Un-register with default source group; use custom
+        unregister.source_group(spec_id, ImageFieldSourceGroup(cls, self.source))
+        instance_source_group_registry.register(spec_id, ImageFieldSourceGroup(cls, self.source), self.get_spec_instance_attrs())  
 
-        register_group(self.source)
+        # setattr(cls, name, InstanceSpecFileDescriptor(self, name, source))
+        self._set_spec_id(cls, name)
+        
+    def get_spec(self, source):
+        
+        item = generator_registry.get(self.spec_id, source=source, specs=self.get_spec_instance_attrs())
+
+        return item
 
 
+    def get_spec_class(self):
+        return InstanceSpec
+
+    def get_spec_instance_attrs(self):
+        return {'options': self.options, 'processors': self.processors, 'format': self.format} #override
+
+
+class InstanceFormatSpecField(InstanceSpecField):
+
+    def __init__(self, format_field, processors=None, format=None, options=None,
+            source=None, cachefile_storage=None, autoconvert=None,
+            cachefile_backend=None, cachefile_strategy=None, spec=None,
+            id=None):
+        
+        self.format_field = format_field
+
+        super(InstanceFormatSpecField, self).__init__(processors, format, 
+            options, source, cachefile_storage, autoconvert, cachefile_backend, 
+            cachefile_strategy, spec, id)
+
+    def get_spec_instance_attrs(self):
+        return {'options': self.options, 'processors': self.processors, 'format': self.format, 'format_field':self.format_field} #override
+
+    def get_spec_class(self):
+        return InstanceFormatSpec
 
 class CropCoordinates(object):
     def __init__(self, x=None, y=None, width=None, height=None):
