@@ -43,14 +43,17 @@ class PositionCrop(BaseInstanceProcessor):
         #Hash based on crop value
         crop_value = getattr(self.image_instance, self.crop_position_field)
         hashed = u"%s-%s-%s-%s"%(self.crop_position_field, crop_value, self.width, self.height)
+        print hashed
         return hashed
 
+    def get_crop_value(self, instance):
+        return getattr(instance, self.crop_position_field)
 
     def process_instance(self, image, instance): 
 
 
         #Step 1, crop based on crop position
-        crop_value = getattr(instance, self.crop_position_field)
+        crop_value = self.get_crop_value(instance)
         original_width = image.size[0]
         original_height = image.size[1]
         
@@ -121,7 +124,7 @@ class PositionCrop(BaseInstanceProcessor):
 
 class PositionAndFormatCrop(PositionCrop):
     """
-    Processor to create custom image crops. Receieves image_instance and implemen
+    Resize based on crop and format
 
     """
 
@@ -139,6 +142,31 @@ class PositionAndFormatCrop(PositionCrop):
         crop_value = getattr(self.image_instance, self.crop_position_field)
         format = getattr(self.image_instance, self.format_field)
         hashed = u"%s-%s-%s-%s-%s"%(self.crop_position_field, crop_value, format, self.width, self.height)
-
+        print hashed
         return hashed
+
+class FormatProcessor(PositionCrop):
+    """
+    Resize based on format; use default crop
+
+    """
+
+    def __init__(self, options):
+        self.options = options
+        self.format_field = options['format_field']
+        self.resize_method = options['resize_method']
+        self.width = options['width']
+        self.height = options['height']
+        self.upscale = options['upscale'] or False
+
+    def get_crop_value(self, instance):
+        return None
+
+    def get_hash(self):
+        #Hash based on crop value
+        format = getattr(self.image_instance, self.format_field)
+        hashed = u"%s-%s-%s"%(format, self.width, self.height)
+        print hashed
+
+        return hashed        
 

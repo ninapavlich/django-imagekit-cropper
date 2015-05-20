@@ -33,28 +33,90 @@ using the image source and the value of the image crop field.
 ```python
     #models.py
 
-    from imagekit_cropper.fields import ImageCropField, InstanceSpecField  
-    from imagekit_cropper.processors import PositionCrop 
-
-    help = {
-        'square_150_crop': '150px by 150px crop',        
-    }
+    from imagekit_cropper.fields import ImageCropField, InstanceSpecField, InstanceFormatSpecField
+    from imagekit_cropper.processors import PositionCrop, PositionAndFormatCrop, FormatProcessor
 
     image = models.ImageField(blank=True, null=True)
-    square_150_crop_properties = {
+    
+    #Example 1 - BASIC CROP FIELD
+    width_1200_wide_crop_properties = {
         'source':'image',
-        'crop_field':'square_150_crop', 
+        'crop_field':'width_1200_wide_crop', 
         'resize_method':'fill',
-        'width':150,
-        'height':150, 
+        'width':1200,
+        'height':750, 
+        'upscale':True
+    }
+    width_1200_wide_crop = ImageCropField(null=True, blank=True, 
+        properties=width_1200_wide_crop_properties)
+
+    width_1200_wide = InstanceSpecField( 
+        source=width_1200_wide_crop_properties['source'], 
+        options={'quality': 85}, 
+        processors=[PositionCrop(width_1200_wide_crop_properties)])
+
+    #Example 2 - DYNAMIC FORMAT FIELD
+    use_png = models.BooleanField( default = False, 
+        verbose_name='Use .PNG (instead of .JPG)')
+    
+    width_1200_crop_properties = {
+        'source':'image',
+        'format_field':'get_format',
+        'resize_method':'fit',
+        'width':1200,
+        'height':None, 
         'upscale':False
     }
-    square_150_crop = ImageCropField(null=True, blank=True, 
-        properties=square_150_crop_properties, help_text=help['square_150_crop'])
-    square_150 = InstanceSpecField( source=square_150_crop_properties['source'], 
-        id='media:profile:cropspec', format='PNG', options={'quality': 85}, 
-        hash_key_values=['square_150_crop'],
-        instance_processors=[PositionCrop(square_150_crop_properties)])
+    width_1200_crop = ImageCropField(null=True, blank=True, 
+        properties=width_1200_crop_properties)
+    width_1200 = InstanceFormatSpecField( 
+        source=width_1200_crop_properties['source'], 
+        format_field=width_1200_crop_properties['format_field'],
+        options={'quality': 95}, 
+        processors=[FormatProcessor(width_1200_crop_properties)])
+
+    @property
+    def get_format(self):
+        if self.use_png:
+            return 'PNG'
+        return 'JPEG'
+
+
+    #Example 3 - TWO SPECS USING THE SAME CROP
+
+    square_crop_properties = {
+        'source':'image',
+        'crop_field':'square_crop', 
+        'format_field':'get_format',
+        'resize_method':'fill',
+        'aspect_ratio':1,
+        'min_width':400,
+        'min_height':400,
+        'upscale':False
+    }
+    square_crop = ImageCropField(null=True, blank=True, properties=square_crop_properties)
+
+    square_200_crop_properties = copy.copy(square_crop_properties)
+    square_200_crop_properties['width'] = 200
+    square_200_crop_properties['height'] = 200
+    
+    square_200 = InstanceSpecField(
+        format='PNG',
+        source=square_200_crop_properties['source'], 
+        options={'quality': 85}, 
+        processors=[PositionCrop(square_200_crop_properties)]
+    )
+
+    square_400_crop_properties = copy.copy(square_crop_properties)
+    square_400_crop_properties['width'] = 400
+    square_400_crop_properties['height'] = 400
+
+    square_400 = InstanceFormatSpecField(
+        source=square_400_crop_properties['source'], 
+        format_field=square_400_crop_properties['format_field'],
+        options={'quality': 85}, 
+        processors=[PositionAndFormatCrop(square_400_crop_properties)]
+    )
 
 ```  
 
