@@ -43,7 +43,7 @@ class PositionCrop(BaseInstanceProcessor):
         #Hash based on crop value
         crop_value = getattr(self.image_instance, self.crop_position_field)
         hashed = u"%s-%s-%s-%s"%(self.crop_position_field, crop_value, self.width, self.height)
-        print hashed
+        # print hashed
         return hashed
 
     def get_crop_value(self, instance):
@@ -142,7 +142,7 @@ class PositionAndFormatCrop(PositionCrop):
         crop_value = getattr(self.image_instance, self.crop_position_field)
         format = getattr(self.image_instance, self.format_field)
         hashed = u"%s-%s-%s-%s-%s"%(self.crop_position_field, crop_value, format, self.width, self.height)
-        print hashed
+        # print hashed
         return hashed
 
 class FormatProcessor(PositionCrop):
@@ -166,7 +166,7 @@ class FormatProcessor(PositionCrop):
         #Hash based on crop value
         format = getattr(self.image_instance, self.format_field)
         hashed = u"%s-%s-%s"%(format, self.width, self.height)
-        print hashed
+        # print hashed
 
         return hashed        
 
