@@ -58,6 +58,7 @@ well as "a:b" and "a:b:c".""")
                                 spec = generator_registry.get(generator_id, source=source, specs=specs)
 
                                 file = ImageCacheFile(spec)
+                                self.stdout.write('  %s\n' % file)
                                 call_strategy_method(file, 'on_source_saved')                         
 
                             except Exception, err:
