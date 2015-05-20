@@ -2,7 +2,9 @@
 	max-width:260px;
 	font-weight:bold;
 }
-.image-crop-data .upscale.warning{
-	
+.image-crop-data .upscale.warning{	
 	color:#ab2b2b;
+}
+.jcrop-holder{
+	background-color:#eee !important;
 }
