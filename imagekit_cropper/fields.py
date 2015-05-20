@@ -48,7 +48,6 @@ class InstanceSpecField(ImageSpecField):
 
         data = self.get_spec_instance_attrs()
         for attr in data:
-            # print 'set %s = %s'%(attr, data[attr])
             setattr(self.spec, attr, data[attr])
 
         spec_id = id

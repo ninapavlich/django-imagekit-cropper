@@ -130,6 +130,7 @@ class PositionAndFormatCrop(PositionCrop):
 
     def __init__(self, options):
         self.options = options
+        
         self.crop_position_field = options['crop_field']
         self.format_field = options['format_field']
         self.resize_method = options['resize_method']
