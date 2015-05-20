@@ -6,11 +6,17 @@ A library to enhance django-imagekit which allows you to specify your image vari
 **InstanceSpecField** This is a class that extends ImageSpecField which passes the model instance to 
 the processors so that you can access other model fields to process the image.
 
+**InstanceFormatSpecField** This is a class that extends InstanceSpecField and can dynamically choose the image format (e.g. JPEG, PNG, GIF). PNGs have a much larger file size than JPEGs, but sometimes it's worth the filesize; this allows the admins to control on a per-image basis. Just pass a reference to the model field that returns a PIL-compatible file format.
+
 **ImageCropField** This is a custom model field for setting the image crop. This uses a custom
 widget to allow admins to visually crop the image.
 
 **PositionCrop** This a custom processor which recieves the model instance and crops the image
 using the image source and the value of the image crop field.
+
+**FormatProcessor** This is a custom processor which implements resizing and outputs to a dynamic format.
+
+**PositionAndFormatCrop** This processor extends PositionCrop and also implements dynamic format.
 
 **WARNING:** This library is in very early alpha stages. I have only tested this on version django-imagekit==3.2.5
 
@@ -56,8 +62,7 @@ using the image source and the value of the image crop field.
         processors=[PositionCrop(width_1200_wide_crop_properties)])
 
     #Example 2 - DYNAMIC FORMAT FIELD
-    use_png = models.BooleanField( default = False, 
-        verbose_name='Use .PNG (instead of .JPG)')
+    
     
     width_1200_crop_properties = {
         'source':'image',
@@ -67,14 +72,15 @@ using the image source and the value of the image crop field.
         'height':None, 
         'upscale':False
     }
-    width_1200_crop = ImageCropField(null=True, blank=True, 
-        properties=width_1200_crop_properties)
     width_1200 = InstanceFormatSpecField( 
         source=width_1200_crop_properties['source'], 
         format_field=width_1200_crop_properties['format_field'],
         options={'quality': 95}, 
         processors=[FormatProcessor(width_1200_crop_properties)])
-
+    
+    use_png = models.BooleanField( default = False, 
+        verbose_name='Use .PNG (instead of .JPG)')
+        
     @property
     def get_format(self):
         if self.use_png:
