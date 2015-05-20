@@ -59,7 +59,7 @@ class InstanceSpec(ImageSpec):
 			else:
 				keys.append(processor)
 		
-		print 'keys: %s'%(keys)
+		# print 'keys: %s'%(keys)
 		pickled = hashers.pickle(keys)
 		return pickled
 
