@@ -41,16 +41,25 @@ well as "a:b" and "a:b:c".""")
                         except Exception as err:
                             self.stdout.write('\tFailed %s\n' % (err))
             except:
-                for k, v in cachefile_registry._cachefiles.items():
+                items = cachefile_registry._cachefiles.items()
+                
+                for k, v in items:
+
+                    
                     if generator_id in v:
                         #k is SourceGroupFilesGenerator
                        
+
                         model_class = k.source_group.model_class
                         image_field = k.source_group.image_field
                         all_objects = model_class.objects.all()
+                        item_count = len(all_objects)
+                        count = 0
 
                         for instance in all_objects:
-                            
+                            count += 1
+
+                            print 
                             try:
                                 source = getattr(instance, image_field)
                                 specs = spec_data_field_hash[generator_id]
@@ -58,11 +67,12 @@ well as "a:b" and "a:b:c".""")
                                 spec = generator_registry.get(generator_id, source=source, specs=specs)
 
                                 file = ImageCacheFile(spec)
-                                self.stdout.write('  %s\n' % file)
+                                self.stdout.write('  [%s of %s] - %s\n' % (count, item_count, file))
                                 call_strategy_method(file, 'on_source_saved')                         
 
                             except Exception, err:
-                                print traceback.format_exc()
+
+                                self.stdout.write('ERROR: %s\n' % (traceback.format_exc()))
                         
 
     def compile_patterns(self, generator_ids):
