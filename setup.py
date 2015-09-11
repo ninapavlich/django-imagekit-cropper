@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'imagekit_cropper',
     packages = ['imagekit_cropper'],
-    version = '1.7',
+    version = '1.8',
     description = 'Allow users to manually specify image variant crops',
     author = 'Nina Pavlich',
     author_email='nina@ninalp.com',
