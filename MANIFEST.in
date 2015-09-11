@@ -1,15 +1,2 @@
-include AUTHORS.rst
-include LICENSE
-include CHANGELOG.rst
-include README.md
-include docs/ *
-include imagekit_cropper/ *
-include imagekit_cropper/static/admin/media/crop/js/imagecrop.js
-include imagekit_cropper/static/admin/media/crop/css/imagecrop.css
-include imagekit_cropper/static/admin/media/crop/jcrop/css/Jcrop.gif
-include imagekit_cropper/static/admin/media/crop/jcrop/css/jquery.Jcrop.css
-include imagekit_cropper/static/admin/media/crop/jcrop/css/jquery.Jcrop.min.css
-include imagekit_cropper/static/admin/media/crop/jcrop/js/jquery.color.js
-include imagekit_cropper/static/admin/media/crop/jcrop/js/jquery.Jcrop.js
-include imagekit_cropper/static/admin/media/crop/jcrop/js/jquery.Jcrop.min.js
-include imagekit_cropper/static/admin/media/crop/jcrop/js/jquery.min.js
+include README.rst
+recursive-include media/ *
