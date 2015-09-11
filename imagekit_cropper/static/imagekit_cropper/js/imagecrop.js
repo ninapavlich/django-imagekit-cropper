@@ -2,6 +2,7 @@
  * nina@ninalp.com
  */
 
+$image_cropper_jquery = jQuery.noConflict();
 
 ;(function ( $, window, document, undefined ) {
 
@@ -388,13 +389,11 @@
         });
     };
 
-})( jQuery, window, document );
+})( $image_cropper_jquery, window, document );
 
 
-
-
-$( document ).ready(function() {
- $(".image-crop-container").imageCropWidget();
+$image_cropper_jquery( document ).ready(function() {
+ $image_cropper_jquery(".image-crop-container").imageCropWidget();
 });
 
 
