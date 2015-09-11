@@ -7,9 +7,9 @@ class ImageCropWidget(widgets.AdminTextInputWidget):
 
 	class Media:
 		css = {
-			'all': ('admin/media/crop/jcrop/css/jquery.Jcrop.css', 'admin/media/crop/css/imagecrop.css',)
+			'all': ('imagekit_cropper/jcrop/css/jquery.Jcrop.css', 'imagekit_cropper/css/imagecrop.css',)
 		}
-		js = ('admin/media/crop/js/imagecrop.js','admin/media/crop/jcrop/js/jquery.Jcrop.js')
+		js = ('imagekit_cropper/js/vendor/jquery.js','imagekit_cropper/js/imagecrop.js','imagekit_cropper/jcrop/js/jquery.Jcrop.js')
 	
 	def __init__(self, properties, help_text='', *args, **kwargs):
 		self.properties = properties

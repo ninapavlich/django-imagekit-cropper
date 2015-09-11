@@ -2,9 +2,6 @@
  * nina@ninalp.com
  */
 
- //TO DO: 
-window['$'] = grp.jQuery;
-window['jQuery'] = grp.jQuery;
 
 ;(function ( $, window, document, undefined ) {
 
