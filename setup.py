@@ -2,19 +2,23 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'django-imagekit-cropper',
-    packages = ['django_imagekit_cropper'],
-    version = '1.8',
-    description = 'Allow users to manually specify image variant crops',
+    version = '1.9',
     author = 'Nina Pavlich',
     author_email='nina@ninalp.com',
     url = 'https://github.com/ninapavlich/django-imagekit-cropper',
+    license = "MIT",
+    description = 'Allow users to manually specify image variant crops',
     keywords = ['libraries', 'web development', 'cms', 'django', 'django-grappelli'],
+    include_package_data = True,
+    packages = ['imagekit_cropper'],
+    
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
-        'License :: OSI Approved',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python'
     ]

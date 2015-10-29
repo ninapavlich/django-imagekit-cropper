@@ -1,2 +1,11 @@
-include README.rst
-recursive-include media/ *
+include README.md
+include LICENSE.txt
+include imagekit_cropper/static/imagekit_cropper/css/*.css
+include imagekit_cropper/static/imagekit_cropper/js/*.js
+include imagekit_cropper/static/imagekit_cropper/js/vendor/*.js
+include imagekit_cropper/static/imagekit_cropper/jcrop/css/*.css
+include imagekit_cropper/static/imagekit_cropper/jcrop/css/*.gif
+include imagekit_cropper/static/imagekit_cropper/jcrop/js/*.js
+include imagekit_cropper/management/*.py
+include imagekit_cropper/management/commands/*.py
+recursive-include imagekit_cropper/ *.py *.css *.js *.html
