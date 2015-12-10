@@ -103,7 +103,9 @@ $image_cropper_jquery = jQuery.noConflict();
                 this.original_width = -1;
                 this.original_height = -1;
                 var image = $("<img/>");
-                $(image).attr("crossorigin", "anonymous");
+                if(this.image_source.substring(0,4).toLowerCase()==='http') {
+                    $(image).attr("crossorigin", "anonymous");
+                }
                 window['image_crops'][this.image_source] = {'loaded':false,'image':image}
 
                 image.load(function(event) {
