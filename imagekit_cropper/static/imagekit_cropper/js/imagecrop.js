@@ -118,7 +118,7 @@ $image_cropper_jquery = jQuery.noConflict();
                 });
 
                 var cachebuster = new Date().getTime();
-                var cache_string = this.image_source.toLowerCase().indexOf('data:') >= 0? '' : +"?v="+cachebuster;
+                var cache_string = this.image_source.toLowerCase().indexOf('data:') >= 0? '' : "?v="+cachebuster;
                 image.attr("src", this.image_source+cache_string);
 
             }
