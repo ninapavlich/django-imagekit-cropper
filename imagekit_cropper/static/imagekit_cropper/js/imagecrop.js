@@ -58,7 +58,6 @@ $image_cropper_jquery = jQuery.noConflict();
             $(this.data_container).append( '<p class="upscale"></p>' );
             this.upscale_container = $(this.data_container).find('.upscale')[0];
 
-
             this.setImageSource(this.getSourceImage(this.target_source));
             
                 
@@ -365,7 +364,7 @@ $image_cropper_jquery = jQuery.noConflict();
             $(this.input_container).unbind('change');
         },
         getSourceImage:function(image_name){
-            var current_value = $('.grp-cell.'+image_name).find(".file-upload a").attr('href')
+            var current_value = $('.grp-cell.'+image_name+", .grp-row."+image_name).find(".file-upload a").attr('href')
             var input_value = $('#id_'+image_name).attr('value');
 
             if(typeof(input_value) == 'undefined'){
