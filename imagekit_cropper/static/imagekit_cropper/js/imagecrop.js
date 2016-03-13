@@ -116,7 +116,8 @@ $image_cropper_jquery = jQuery.noConflict();
 
                     parent.imageLoaded(event, this);
                 });
-                image.attr("src", this.image_source);
+                var cachebuster = new Date().getTime();
+                image.attr("src", this.image_source+"?v="+cachebuster);
 
             }
 
