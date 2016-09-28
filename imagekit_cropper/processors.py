@@ -8,7 +8,7 @@ class BaseInstanceProcessor(object):
 
     def process(self, image):
         if not self.image_instance:
-            print "WARNING: Position crop expects image_instance, but none set."
+            print("WARNING: Position crop expects image_instance, but none set.")
             return image
 
         return self.process_instance(image, self.image_instance)
