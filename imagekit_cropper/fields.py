@@ -124,7 +124,6 @@ class ImageCropField(models.Field):
     """
 
     description = "Image crop coordinates"
-    __metaclass__ = models.SubfieldBase
     
     def __init__(self,properties, help_text=("A comma-separated list of crop coordinates"),verbose_name='imagecropfield', *args,**kwargs):
         self.name="ImageCropField",

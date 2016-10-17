@@ -70,7 +70,7 @@ well as "a:b" and "a:b:c".""")
                                 self.stdout.write('  [%s of %s] - %s\n' % (count, item_count, file))
                                 call_strategy_method(file, 'on_source_saved')                         
 
-                            except Exception, err:
+                            except Exception:
 
                                 self.stdout.write('ERROR: %s\n' % (traceback.format_exc()))
                         
