@@ -152,33 +152,30 @@ class ImageCropField(models.Field):
     def db_type(self, connection):
         return 'varchar(100)'
     
-    def to_python(self,value):
-        
+    def parse_value(self,value):
         if value in ( None,''):
-            
             return CropCoordinates()
         else:
             if isinstance(value, CropCoordinates):
                 return value
             else:
-
                 if 'None' in value:
                     return CropCoordinates()
-
                 split_items = value.split(',')
-
-                
-
                 x = float(split_items[0])
                 y = float(split_items[1])
                 w = float(split_items[2])
                 h = float(split_items[3])
-
                 args = [x,y,w,h]
                 if len(args) != 4 and value is not None:
                     raise ValidationError("Invalid input for a CropCoordinates instance")
                 return CropCoordinates(*args)
-         
+
+    def to_python(self,value):
+        return self.parse_value(value)
+
+    def from_db_value(self, value, expression, connection, context):
+        return self.parse_value(value)
 
     def get_prep_value(self, value):
         if value:
