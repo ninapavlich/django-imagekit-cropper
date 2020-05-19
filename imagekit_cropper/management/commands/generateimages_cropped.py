@@ -4,8 +4,7 @@ import traceback
 from django.core.management.base import BaseCommand
 
 from imagekit.registry import generator_registry, cachefile_registry
-from imagekit.exceptions import MissingSource
-from imagekit.utils import  call_strategy_method
+from imagekit.utils import call_strategy_method
 from imagekit.cachefiles import ImageCacheFile
 
 from imagekit_cropper.registry import spec_data_field_hash

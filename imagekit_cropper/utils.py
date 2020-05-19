@@ -1,23 +1,18 @@
 import inspect
 
-from django.conf import settings
-from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import Signal
 from django.utils.functional import wraps
 
 
-
 from imagekit import hashers
-from imagekit import ImageSpec, register
-from imagekit.models import ProcessedImageField
+from imagekit import ImageSpec
 from imagekit.models.fields.utils import ImageSpecFileDescriptor
 from imagekit.registry import generator_registry, cachefile_registry
-from imagekit.specs.sourcegroups import ImageFieldSourceGroup, ModelSignalRouter, ik_model_receiver
-from imagekit.utils import  call_strategy_method
+from imagekit.specs.sourcegroups import ImageFieldSourceGroup
+from imagekit.utils import call_strategy_method
 from imagekit.cachefiles import ImageCacheFile
 from imagekit.exceptions import MissingSource
-
 
 
 from pilkit.processors import ProcessorPipeline
@@ -74,7 +69,7 @@ class InstanceSourceGroupRegistry(object):
         generator_ids = self._source_groups.setdefault(source_group, set())
         generator_ids.add(generator_id)
         cachefile_registry.register(generator_id,
-                SourceGroupFilesGenerator(source_group, generator_id))
+                                    SourceGroupFilesGenerator(source_group, generator_id))
 
     def unregister(self, generator_id, source_group):
         from imagekit.specs.sourcegroups import SourceGroupFilesGenerator
@@ -82,7 +77,7 @@ class InstanceSourceGroupRegistry(object):
         if generator_id in generator_ids:
             generator_ids.remove(generator_id)
             cachefile_registry.unregister(generator_id,
-                    SourceGroupFilesGenerator(source_group, generator_id))
+                                          SourceGroupFilesGenerator(source_group, generator_id))
 
     def source_group_receiver(self, sender, source, signal, **kwargs):
         """
@@ -98,13 +93,13 @@ class InstanceSourceGroupRegistry(object):
         if source_group not in self._source_groups:
             return
 
-        #HOOK -- update source to point to image file.
+        # HOOK -- update source to point to image file.
         for id in self._source_groups[source_group]:
 
-            spec_to_update = generator_registry.get(id, source=source, instance=instance, field=hack_spec_field_hash[id])            
-                        
+            spec_to_update = generator_registry.get(id, source=source, instance=instance, field=hack_spec_field_hash[id])
+
         specs = [generator_registry.get(id, source=source, instance=instance, field=hack_spec_field_hash[id]) for id in
-                self._source_groups[source_group]]
+                 self._source_groups[source_group]]
         callback_name = self._signals[signal]
         # print 'callback_name? %s'%(callback_name)
 

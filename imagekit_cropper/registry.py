@@ -27,13 +27,13 @@ class InstanceSourceGroupRegistry(object):
             signal.connect(self.source_group_receiver)
 
     def register(self, generator_id, source_group, data):
-        
+
         from imagekit.specs.sourcegroups import SourceGroupFilesGenerator
         generator_ids = self._source_groups.setdefault(source_group, set())
         generator_ids.add(generator_id)
         spec_data_field_hash[generator_id] = data
         cachefile_registry.register(generator_id,
-                SourceGroupFilesGenerator(source_group, generator_id))
+                                    SourceGroupFilesGenerator(source_group, generator_id))
 
     def unregister(self, generator_id, source_group):
         from imagekit.specs.sourcegroups import SourceGroupFilesGenerator
@@ -41,7 +41,7 @@ class InstanceSourceGroupRegistry(object):
         if generator_id in generator_ids:
             generator_ids.remove(generator_id)
             cachefile_registry.unregister(generator_id,
-                    SourceGroupFilesGenerator(source_group, generator_id))
+                                          SourceGroupFilesGenerator(source_group, generator_id))
 
     def source_group_receiver(self, sender, source, signal, **kwargs):
         """
@@ -56,12 +56,11 @@ class InstanceSourceGroupRegistry(object):
         if source_group not in self._source_groups:
             return
 
-
-        #OVERRIDE HERE -- pass specs into generator object
+        # OVERRIDE HERE -- pass specs into generator object
         specs = [generator_registry.get(id, source=source, specs=spec_data_field_hash[id]) for id in
-                self._source_groups[source_group]]
+                 self._source_groups[source_group]]
         callback_name = self._signals[signal]
-        #END OVERRIDE
+        # END OVERRIDE
 
         for spec in specs:
             file = ImageCacheFile(spec)
