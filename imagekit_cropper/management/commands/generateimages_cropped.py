@@ -4,7 +4,6 @@ import traceback
 from django.core.management.base import BaseCommand
 
 from imagekit.registry import generator_registry, cachefile_registry
-from imagekit.exceptions import MissingSource
 from imagekit.utils import  call_strategy_method
 from imagekit.cachefiles import ImageCacheFile
 
@@ -21,11 +20,14 @@ match both. Subsegments are always matched, so "a" will match "a" as
 well as "a:b" and "a:b:c".""")
     args = '[generator_ids]'
 
+    def add_arguments(self, parser):
+        parser.add_argument('generator_id', nargs='*', help='<app_name>:<model>:<field> for model specs')
     def handle(self, *args, **options):
         generators = generator_registry.get_ids()
 
-        if args:
-            patterns = self.compile_patterns(args)
+        generator_ids = options['generator_id'] if 'generator_id' in options else args
+        if generator_ids:
+            patterns = self.compile_patterns(generator_ids)
             generators = (id for id in generators if any(p.match(id) for p in patterns))
 
         for generator_id in generators:

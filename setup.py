@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='django-imagekit-cropper',
-    version='1.17',
+    version='1.18',
     author='Nina Pavlich',
     author_email='nina@ninalp.com',
     url='https://github.com/ninapavlich/django-imagekit-cropper',
