@@ -18,23 +18,23 @@ class ImageCropWidget(widgets.AdminTextInputWidget):
         return super(ImageCropWidget, self).__init__(*args, **kwargs)
 
     def get_crop_containers(self):
-        properties = self.properties
+
         if 'aspect_ratio' in self.properties:
             return '<div class="image-cropper" data-width="%s" data-height="%s" data-ratio="%s" \
-			data-resize-method="%s" data-source="%s" data-upscale="%s" ></div>\
-			' % (self.properties['min_width'], self.properties['min_height'],
-                self.properties['aspect_ratio'], self.properties['resize_method'],
-                self.properties['source'], self.properties['upscale'])
+            data-resize-method="%s" data-source="%s" data-upscale="%s" ></div>\
+            ' % (self.properties['min_width'], self.properties['min_height'],
+                 self.properties['aspect_ratio'], self.properties['resize_method'],
+                 self.properties['source'], self.properties['upscale'])
 
         else:
             return '<div class="image-cropper" data-width="%s" data-height="%s" \
-				data-resize-method="%s" data-source="%s" data-upscale="%s" ></div>\
-				' % (self.properties['width'],
-                self.properties['height'], self.properties['resize_method'],
-                self.properties['source'], self.properties['upscale'])
+                data-resize-method="%s" data-source="%s" data-upscale="%s" ></div>\
+                ' % (self.properties['width'],
+                     self.properties['height'], self.properties['resize_method'],
+                     self.properties['source'], self.properties['upscale'])
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         rendered = super(ImageCropWidget, self).render(name, value, attrs)
         return mark_safe('<div class="image-crop-container">%s%s<div \
-			class="image-crop-data"><p class="help">%s</p></div>\
-			</div>' % (rendered, self.get_crop_containers(), self.help_text))
+            class="image-crop-data"><p class="help">%s</p></div>\
+            </div>' % (rendered, self.get_crop_containers(), self.help_text))
