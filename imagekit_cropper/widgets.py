@@ -36,5 +36,5 @@ class ImageCropWidget(widgets.AdminTextInputWidget):
     def render(self, name, value, attrs=None):
         rendered = super(ImageCropWidget, self).render(name, value, attrs)
         return mark_safe('<div class="image-crop-container">%s%s<div \
-			class="image-crop-data"><p class="grp-help">%s</p></div>\
+			class="image-crop-data"><p class="help">%s</p></div>\
 			</div>' % (rendered, self.get_crop_containers(), self.help_text))

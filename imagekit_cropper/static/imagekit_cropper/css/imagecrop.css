@@ -1,10 +1,22 @@
-.image-crop-data .upscale{
-	max-width:260px;
-	font-weight:bold;
+.image-cropper {
+    margin-top: 10px;
 }
-.image-crop-data .upscale.warning{	
-	color:#ab2b2b;
+
+@media (min-width: 768px) {
+    .image-cropper {
+        margin-left: 170px;
+    }
 }
-.jcrop-holder{
-	background-color:#eee !important;
+
+.image-crop-data .upscale {
+    max-width: 260px;
+    font-weight: bold;
+}
+
+.image-crop-data .upscale.warning {
+    color: #ab2b2b;
+}
+
+.jcrop-holder {
+    background-color: #eee !important;
 }
